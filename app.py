@@ -64,9 +64,9 @@ def format_question(lines, index):
 
 # Main function for the Streamlit app
 def main():
-    st.title("Text to Excel Converter 🔄")
-    st.write("Upload a quiz text file and convert it into an Excel file with formatted questions and answers.")
-    st.write("**Sample formatted question. Make sure to have blank line between questions and choices are uppercase as well as the answer.**")
+    st.title("Text to Excel for Quizizz 🔄")
+    st.write("Upload a quiz text file and convert it into an Excel file that can be imported on Quizizz.com.")
+    st.write("**Below is a sample of formatted question. Make sure to have blank line between questions and choices are uppercase as well as the answer.**")
     st.code("""
 What can a robot do that helps you clean your room?
 A) Cook dinner
