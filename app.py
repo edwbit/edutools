@@ -27,9 +27,12 @@ def format_question(lines, index):
         question_text = lines[index].strip()
         print(f"Processing line {index}: {question_text}")  # Debugging statement
         
-        # Remove the leading number and closing parenthesis (e.g., "1. ")
-        if question_text[0].isdigit() and question_text[1] == '.':
-            question_text = question_text[3:].strip()  # Strip "1) " from the start
+        # Remove the leading number and period (e.g., "1. ", "50. ", "100. ")
+        if question_text[0].isdigit():
+            # Find the position of the first period
+            period_index = question_text.find('.')
+            if period_index != -1:
+                question_text = question_text[period_index + 1:].strip()  # Strip everything before and including the period
         
         if not question_text:
             st.warning(f"Warning: Empty question found at index {index}.")
