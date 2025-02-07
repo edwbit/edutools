@@ -17,7 +17,7 @@ def format_question(lines, index):
         
         # Validate the question format: Must start with a number and period (e.g., "1. ")
         if not question_text[0].isdigit() or '.' not in question_text:
-            st.warning(f"Warning: Question at index {index} does not start with a number and period. Skipping this question.")
+            st.warning(f"Error: Question at line {index + 1} is not in the correct format. Expected format: '1. What is your question?'. Skipping this question.")
             return None
         
         # Remove the leading number and period (e.g., "1. ", "50. ", "100. ")
@@ -25,11 +25,11 @@ def format_question(lines, index):
         if period_index != -1:
             question_text = question_text[period_index + 1:].strip()  # Strip everything before and including the period
         else:
-            st.warning(f"Warning: Question at index {index} is missing a period after the number. Skipping this question.")
+            st.warning(f"Error: Question at line {index + 1} is missing a period after the number. Skipping this question.")
             return None
         
         if not question_text:
-            st.warning(f"Warning: Empty question found at index {index}.")
+            st.warning(f"Warning: Empty question found at line {index + 1}.")
             return None
         
         question.append(question_text)
@@ -46,30 +46,30 @@ def format_question(lines, index):
                 correct_answer = line.split(':')[1].strip()
                 break
             elif line:  # If the line is not empty and doesn't start with an answer or correct answer
-                st.warning(f"Unexpected line found at index {i}: {line}")
+                st.warning(f"Unexpected line found at line {i + 1}: {line}")
                 return None
             else:
                 continue  # Skip blank lines
         
         # Validate answers
         if len(answers) != 4:
-            st.warning(f"Warning: Question at index {index} does not have exactly 4 answers.")
+            st.warning(f"Warning: Question at line {index + 1} does not have exactly 4 answers.")
             return None
         
         # Determine the correct answer index
         if correct_answer:
             correct_index = ord(correct_answer) - ord('A') + 1
             if correct_index < 1 or correct_index > 4:
-                st.warning(f"Warning: Invalid correct answer '{correct_answer}' for question at index {index}.")
+                st.warning(f"Warning: Invalid correct answer '{correct_answer}' for question at line {index + 1}.")
                 return None
         else:
-            st.warning(f"Warning: No correct answer found for question at index {index}.")
+            st.warning(f"Warning: No correct answer found for question at line {index + 1}.")
             return None
         
         return question + answers + [correct_index]
     
     except Exception as e:
-        st.error(f"An error occurred while formatting the question at index {index}: {e}")
+        st.error(f"An unexpected error occurred while processing the question at line {index + 1}: {e}")
         return None
 
 # Main function for the Streamlit app
