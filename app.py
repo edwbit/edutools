@@ -27,8 +27,8 @@ def format_question(lines, index):
         question_text = lines[index].strip()
         print(f"Processing line {index}: {question_text}")  # Debugging statement
         
-        # Remove the leading number and closing parenthesis (e.g., "1) ")
-        if question_text[0].isdigit() and question_text[1] == ')':
+        # Remove the leading number and closing parenthesis (e.g., "1. ")
+        if question_text[0].isdigit() and question_text[1] == '.':
             question_text = question_text[3:].strip()  # Strip "1) " from the start
         
         if not question_text:
