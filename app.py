@@ -3,18 +3,6 @@ import streamlit as st  # Import streamlit for creating the web app
 from openpyxl.styles import Alignment  # Import Alignment from openpyxl for cell formatting
 from io import BytesIO  # Import BytesIO for handling in-memory binary streams
 
-# Function to read and process the quiz file
-def read_quiz(file_content):
-    try:
-        content = file_content.read().decode('utf-8').split('\n')  # Read the file content
-        print("File content read successfully:")
-        for i, line in enumerate(content):
-            print(f"{i}: {line.strip()}")  # Print each line with its index
-        return content
-    except Exception as e:
-        st.error(f"An error occurred while reading the file: {e}")
-        return None
-
 # Function to format a single question
 def format_question(lines, index):
     try:
@@ -27,12 +15,18 @@ def format_question(lines, index):
         question_text = lines[index].strip()
         print(f"Processing line {index}: {question_text}")  # Debugging statement
         
+        # Validate the question format: Must start with a number and period (e.g., "1. ")
+        if not question_text[0].isdigit() or '.' not in question_text:
+            st.warning(f"Warning: Question at index {index} does not start with a number and period. Skipping this question.")
+            return None
+        
         # Remove the leading number and period (e.g., "1. ", "50. ", "100. ")
-        if question_text[0].isdigit():
-            # Find the position of the first period
-            period_index = question_text.find('.')
-            if period_index != -1:
-                question_text = question_text[period_index + 1:].strip()  # Strip everything before and including the period
+        period_index = question_text.find('.')
+        if period_index != -1:
+            question_text = question_text[period_index + 1:].strip()  # Strip everything before and including the period
+        else:
+            st.warning(f"Warning: Question at index {index} is missing a period after the number. Skipping this question.")
+            return None
         
         if not question_text:
             st.warning(f"Warning: Empty question found at index {index}.")
