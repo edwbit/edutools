@@ -84,14 +84,14 @@ def main():
     st.write("Upload a quiz text file and convert it into an Excel file that can be imported on Quizizz.com.")
     st.write("**Below is a sample of formatted question. Make sure to have blank line between questions and choices are uppercase as well as the answer.**")
     st.code("""
-What can a robot do that helps you clean your room?
+1. What can a robot do that helps you clean your room?
 A) Cook dinner
 B) Vacuum the floor
 C) Wash dishes
 D) Do homework
 ANSWER: B
 
-Which of the following is an example of a smart device that uses AI?
+2. Which of the following is an example of a smart device that uses AI?
 A) A toy car
 B) A teddy bear
 C) A smart speaker (like Alexa or Siri)
