@@ -3,6 +3,18 @@ import streamlit as st  # Import streamlit for creating the web app
 from openpyxl.styles import Alignment  # Import Alignment from openpyxl for cell formatting
 from io import BytesIO  # Import BytesIO for handling in-memory binary streams
 
+# Function to read and process the quiz file
+def read_quiz(file_content):
+    try:
+        content = file_content.read().decode('utf-8').split('\n')  # Read the file content
+        print("File content read successfully:")
+        for i, line in enumerate(content):
+            print(f"{i}: {line.strip()}")  # Print each line with its index
+        return content
+    except Exception as e:
+        st.error(f"An error occurred while reading the file: {e}")
+        return None
+
 # Function to format a single question
 def format_question(lines, index):
     try:
@@ -15,21 +27,12 @@ def format_question(lines, index):
         question_text = lines[index].strip()
         print(f"Processing line {index}: {question_text}")  # Debugging statement
         
-        # Validate the question format: Must start with a number and period (e.g., "1. ")
-        if not question_text[0].isdigit() or '.' not in question_text:
-            st.warning(f"Error: Question at line {index + 1} is not in the correct format. Expected format: '1. What is your question?'. Skipping this question.")
-            return None
-        
-        # Remove the leading number and period (e.g., "1. ", "50. ", "100. ")
-        period_index = question_text.find('.')
-        if period_index != -1:
-            question_text = question_text[period_index + 1:].strip()  # Strip everything before and including the period
-        else:
-            st.warning(f"Error: Question at line {index + 1} is missing a period after the number. Skipping this question.")
-            return None
+        # Remove the leading number and closing parenthesis (e.g., "1) ")
+        if question_text[0].isdigit() and question_text[1] == ')':
+            question_text = question_text[3:].strip()  # Strip "1) " from the start
         
         if not question_text:
-            st.warning(f"Warning: Empty question found at line {index + 1}.")
+            st.warning(f"Warning: Empty question found at index {index}.")
             return None
         
         question.append(question_text)
@@ -46,30 +49,30 @@ def format_question(lines, index):
                 correct_answer = line.split(':')[1].strip()
                 break
             elif line:  # If the line is not empty and doesn't start with an answer or correct answer
-                st.warning(f"Unexpected line found at line {i + 1}: {line}")
+                st.warning(f"Unexpected line found at index {i}: {line}")
                 return None
             else:
                 continue  # Skip blank lines
         
         # Validate answers
         if len(answers) != 4:
-            st.warning(f"Warning: Question at line {index + 1} does not have exactly 4 answers.")
+            st.warning(f"Warning: Question at index {index} does not have exactly 4 answers.")
             return None
         
         # Determine the correct answer index
         if correct_answer:
             correct_index = ord(correct_answer) - ord('A') + 1
             if correct_index < 1 or correct_index > 4:
-                st.warning(f"Warning: Invalid correct answer '{correct_answer}' for question at line {index + 1}.")
+                st.warning(f"Warning: Invalid correct answer '{correct_answer}' for question at index {index}.")
                 return None
         else:
-            st.warning(f"Warning: No correct answer found for question at line {index + 1}.")
+            st.warning(f"Warning: No correct answer found for question at index {index}.")
             return None
         
         return question + answers + [correct_index]
     
     except Exception as e:
-        st.error(f"An unexpected error occurred while processing the question at line {index + 1}: {e}")
+        st.error(f"An error occurred while formatting the question at index {index}: {e}")
         return None
 
 # Main function for the Streamlit app
@@ -78,14 +81,14 @@ def main():
     st.write("Upload a quiz text file and convert it into an Excel file that can be imported on Quizizz.com.")
     st.write("**Below is a sample of formatted question. Make sure to have blank line between questions and choices are uppercase as well as the answer.**")
     st.code("""
-1. What can a robot do that helps you clean your room?
+What can a robot do that helps you clean your room?
 A) Cook dinner
 B) Vacuum the floor
 C) Wash dishes
 D) Do homework
 ANSWER: B
 
-2. Which of the following is an example of a smart device that uses AI?
+Which of the following is an example of a smart device that uses AI?
 A) A toy car
 B) A teddy bear
 C) A smart speaker (like Alexa or Siri)
