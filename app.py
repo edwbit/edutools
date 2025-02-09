@@ -1,4 +1,3 @@
-#Working as of 2/9/2025
 import pandas as pd  # Import pandas library for data manipulation
 import streamlit as st  # Import streamlit for creating the web app
 from openpyxl.styles import Alignment  # Import Alignment from openpyxl for cell formatting
@@ -88,7 +87,6 @@ B) Vacuum the floor
 C) Wash dishes
 D) Do homework
 ANSWER: B
-
 Which of the following is an example of a smart device that uses AI?
 A) A toy car
 B) A teddy bear
@@ -105,23 +103,40 @@ ANSWER: C
             return
         data = []
         index = 0
+        success_count = 0  # Counter for successfully processed questions
+        fail_count = 0     # Counter for failed processing attempts
+        
         while index < len(lines):
             line = lines[index].strip()
             if line and not line.startswith(('A)', 'B)', 'C)', 'D)', 'ANSWER:')):
                 formatted_question = format_question(lines, index)
                 if formatted_question is not None:
                     data.append(formatted_question)
+                    success_count += 1  # Increment success counter
                     # Skip the lines containing answers and the correct answer
                     index += len(formatted_question) - 1
+                else:
+                    fail_count += 1  # Increment fail counter
             index += 1
+        
+        # Display summary
+        total_items = success_count + fail_count
+        st.info(f"Processing Summary:\n"
+                f"- Successfully Processed: {success_count}\n"
+                f"- Failed to Process: {fail_count}\n"
+                f"- Total Items Processed: {total_items}")
+        
         if not data:
             st.error("No valid questions found in the file.")
             return
+        
         # Create DataFrame
         df = pd.DataFrame(data, columns=['Question Text', 'Question Type', 'Option 1', 'Option 2', 'Option 3', 'Option 4', 'Correct Answer'])
         df = df.sort_values(by='Question Text')
+        
         # Default filename
         excel_filename = "quiz.xlsx"
+        
         # Create Excel file in memory
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -139,6 +154,7 @@ ANSWER: C
             for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=1, max_col=7):
                 for cell in row:
                     cell.alignment = Alignment(wrap_text=True)
+        
         # Provide download button
         st.success("File processed successfully! Click below to download the Excel file.")
         st.download_button(
