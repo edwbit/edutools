@@ -22,27 +22,30 @@ def format_question(lines, index):
         answers = []
         correct_answer = None
         correct_index = -1
-        
+
         # Extract the question text
         question_text = lines[index].strip()
         print(f"Processing line {index}: {question_text}")  # Debugging statement
-        
-        # Remove the leading number and closing parenthesis (e.g., "1) ")
+
+        # Remove the leading number and closing parenthesis (e.g., "1) ", "55) ", "101) ")
         if question_text[0].isdigit() and question_text[1] == ')':
-            question_text = question_text[3:].strip()  # Strip "1) " from the start
-        
+            # Find the position of the closing parenthesis
+            closing_parenthesis_pos = question_text.find(')')
+            if closing_parenthesis_pos != -1:
+                question_text = question_text[closing_parenthesis_pos + 2:].strip()  # Strip "1) ", "55) ", "101) " from the start
+
         if not question_text:
             st.warning(f"Warning: Empty question found at index {index}.")
             return None
-        
+
         question.append(question_text)
         question.append("multiple choice")
-        
+
         # Extract answers and correct answer
         for i in range(index + 1, len(lines)):
             line = lines[i].strip()
             print(f"Processing line {i}: {line}")  # Debugging statement
-            
+
             if line.startswith(('A)', 'B)', 'C)', 'D)')):
                 answers.append(line[3:].strip())
             elif line.startswith('ANSWER:'):
@@ -53,12 +56,12 @@ def format_question(lines, index):
                 return None
             else:
                 continue  # Skip blank lines
-        
+
         # Validate answers
         if len(answers) != 4:
             st.warning(f"Warning: Question at index {index} does not have exactly 4 answers.")
             return None
-        
+
         # Determine the correct answer index
         if correct_answer:
             correct_index = ord(correct_answer) - ord('A') + 1
@@ -68,9 +71,9 @@ def format_question(lines, index):
         else:
             st.warning(f"Warning: No correct answer found for question at index {index}.")
             return None
-        
+
         return question + answers + [correct_index]
-    
+
     except Exception as e:
         st.error(f"An error occurred while formatting the question at index {index}: {e}")
         return None
