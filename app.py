@@ -28,7 +28,7 @@ def format_question(lines, index):
         print(f"Processing line {index}: {question_text}")  # Debugging statement
 
         # Remove the leading number and closing parenthesis (e.g., "1) ", "55) ", "101) ")
-        if question_text[0].isdigit() and question_text[1] == ')':
+        if question_text[0].isdigit():
             # Find the position of the closing parenthesis
             closing_parenthesis_pos = question_text.find(')')
             if closing_parenthesis_pos != -1:
