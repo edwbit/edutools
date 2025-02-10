@@ -13,8 +13,8 @@ def read_quiz(file_content):
     try:
         content = file_content.read().decode('utf-8').split('\n')  # Read the file content and split into lines. This assumes the file is encoded in UTF-8.
         print("File content read successfully:") # Debugging statement to confirm the file content is read successfully
-        for i, line in enumerate(content): # Iterate over the lines with their indices to print them for debugging
-            print(f"{i}: {line.strip()}")  # Print each line with its index
+        #for i, line in enumerate(content): # Iterate over the lines with their indices to print them for debugging
+            #print(f"{i}: {line.strip()}")  # Print each line with its index
         return content # Return the list of lines from the file content to be processed further
     except Exception as e: # Handle any exceptions that occur while reading the file 
         st.error(f"An error occurred while reading the file: {e}") # Display an error message in the web app if an exception occurs
