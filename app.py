@@ -14,7 +14,7 @@ def read_quiz(file_content):
         content = file_content.read().decode('utf-8').split('\n')  # Read the file content and split into lines. This assumes the file is encoded in UTF-8.
         print("File content read successfully:") # Debugging statement to confirm the file content is read successfully
         for i, line in enumerate(content): # Iterate over the lines with their indices to print them for debugging
-            print(f"{i}: {line.strip()}")  # Print each line with its index
+            #print(f"{i}: {line.strip()}")  # Print each line with its index
         return content # Return the list of lines from the file content to be processed further
     except Exception as e: # Handle any exceptions that occur while reading the file 
         st.error(f"An error occurred while reading the file: {e}") # Display an error message in the web app if an exception occurs
@@ -30,7 +30,7 @@ def format_question(lines, index): # Function to format a single question from t
 
         # Extract the question text
         question_text = lines[index].strip() #Get the question text from the line at the given index and remove any leading or trailing whitespace
-        print(f"Processing line {index}: {question_text}")  # # Debugging statement to print the question text being processed
+        #print(f"Processing line {index}: {question_text}")  # # Debugging statement to print the question text being processed
 
         # Remove the leading number and period after item number (e.g., "1) ", "55) ", "101) ")
         if question_text[0].isdigit():  # Check if the first character is a digit
