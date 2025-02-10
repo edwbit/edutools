@@ -1,7 +1,9 @@
 import pandas as pd  # Import pandas library for data manipulation
 import streamlit as st  # Import streamlit for creating the web app
+import os
 from openpyxl.styles import Alignment  # Import Alignment from openpyxl for cell formatting
 from io import BytesIO  # Import BytesIO for handling in-memory binary streams
+
 
 #must be the first line of command
 st.set_page_config(page_title="EduTools") 
@@ -141,8 +143,9 @@ ANSWER: C
         df = pd.DataFrame(data, columns=['Question Text', 'Question Type', 'Option 1', 'Option 2', 'Option 3', 'Option 4', 'Correct Answer'])
         df = df.sort_values(by='Question Text')
         
-        # Default filename
-        excel_filename = "quiz.xlsx"
+        # Generate Excel file name based on the uploaded file name
+        uploaded_filename = uploaded_file.name
+        excel_filename = f"{os.path.splitext(uploaded_filename)[0]}.xlsx"
         
         # Create Excel file in memory
         output = BytesIO()
