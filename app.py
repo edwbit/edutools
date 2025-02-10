@@ -6,36 +6,36 @@ from io import BytesIO  # Import BytesIO for handling in-memory binary streams
 # Function to read and process the quiz file
 def read_quiz(file_content):
     try:
-        content = file_content.read().decode('utf-8').split('\n')  # Read the file content
-        print("File content read successfully:")
-        for i, line in enumerate(content):
+        content = file_content.read().decode('utf-8').split('\n')  # Read the file content and split into lines. This assumes the file is encoded in UTF-8.
+        print("File content read successfully:") # Debugging statement to confirm the file content is read successfully
+        for i, line in enumerate(content): # Iterate over the lines with their indices to print them for debugging
             print(f"{i}: {line.strip()}")  # Print each line with its index
-        return content
-    except Exception as e:
-        st.error(f"An error occurred while reading the file: {e}")
-        return None
+        return content # Return the list of lines from the file content to be processed further
+    except Exception as e: e: # Handle any exceptions that occur while reading the file 
+        st.error(f"An error occurred while reading the file: {e}") # Display an error message in the web app if an exception occurs
+        return None # Return None if an error occurs while reading the file to indicate that the file content could not be read successfully
 
 # Function to format a single question
-def format_question(lines, index):
-    try:
+def format_question(lines, index): # Function to format a single question from the list of lines and the starting index of the question
+    try: # Try to format the question and handle any exceptions that may occur while processing the question
         question = [] # List to store the question and its answers
         answers = [] # List to store the answers
-        correct_answer = None # Variable to store the correct answer
-        correct_index = -1 # Variable to store the index of the correct answer
+        correct_answer = None # Variable to store the correct answer. None is used to indicate that the correct answer has not been found yet.
+        correct_index = -1 # Variable to store the index of the correct answer. -1 is used to indicate that the correct answer index has not been found yet.
 
         # Extract the question text
-        question_text = lines[index].strip() # Get the question text
-        print(f"Processing line {index}: {question_text}")  # Debugging statement
+        question_text = lines[index].strip() #Get the question text from the line at the given index and remove any leading or trailing whitespace
+        print(f"Processing line {index}: {question_text}")  # # Debugging statement to print the question text being processed
 
         # Remove the leading number and period after item number (e.g., "1) ", "55) ", "101) ")
         if question_text[0].isdigit():  # Check if the first character is a digit
             # Find the position of the period after item number
             period_pos = question_text.find('.') # Find the position of the period after item number
             if period_pos != -1: # If a period after item number is found
-                question_text = question_text[period_pos + 2:].strip()  # Remove the leading number and period after item number
+                question_text = question_text[period_pos + 2:].strip()  # Remove the leading number and period after item number. 2 is added to the period position to remove the period and the space after it.
 
-        if not question_text:      # Check if the question text is empty
-            st.warning(f"Warning: Empty question found at index {index}.") # Display a warning message
+        if not question_text: # Check if the question text is empty after removing the leading number and period after item number
+            st.warning(f"Warning: Empty question found at index {index}.") # Display a warning message indicating that an empty question was found
             return None # Return None to indicate that the question is invalid
 
         question.append(question_text) # Add the question text to the question list
