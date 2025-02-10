@@ -3,6 +3,9 @@ import streamlit as st  # Import streamlit for creating the web app
 from openpyxl.styles import Alignment  # Import Alignment from openpyxl for cell formatting
 from io import BytesIO  # Import BytesIO for handling in-memory binary streams
 
+#must be the first line of command
+st.set_page_config(page_title="EduTools") 
+
 # Function to read and process the quiz file
 def read_quiz(file_content):
     try:
