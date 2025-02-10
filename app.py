@@ -11,7 +11,7 @@ def read_quiz(file_content):
         for i, line in enumerate(content): # Iterate over the lines with their indices to print them for debugging
             print(f"{i}: {line.strip()}")  # Print each line with its index
         return content # Return the list of lines from the file content to be processed further
-    except Exception as e: e: # Handle any exceptions that occur while reading the file 
+    except Exception as e: # Handle any exceptions that occur while reading the file 
         st.error(f"An error occurred while reading the file: {e}") # Display an error message in the web app if an exception occurs
         return None # Return None if an error occurs while reading the file to indicate that the file content could not be read successfully
 
