@@ -22,6 +22,7 @@ def read_quiz(file_content):
         return None # Return None if an error occurs while reading the file to indicate that the file content could not be read successfully
 
 # Function to format a single question
+# Function to format a single question
 def format_question(lines, index):
     try:
         question = []
