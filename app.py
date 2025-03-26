@@ -1,6 +1,7 @@
 import pandas as pd  # Import pandas library for data manipulation
 import streamlit as st  # Import streamlit for creating the web app
 import os
+import re
 from openpyxl.styles import Alignment  # Import Alignment from openpyxl for cell formatting
 from io import BytesIO  # Import BytesIO for handling in-memory binary streams
 
@@ -21,67 +22,67 @@ def read_quiz(file_content):
         return None # Return None if an error occurs while reading the file to indicate that the file content could not be read successfully
 
 # Function to format a single question
-def format_question(lines, index): # Function to format a single question from the list of lines and the starting index of the question
-    try: # Try to format the question and handle any exceptions that may occur while processing the question
-        question = [] # List to store the question and its answers
-        answers = [] # List to store the answers
-        correct_answer = None # Variable to store the correct answer. None is used to indicate that the correct answer has not been found yet.
-        correct_index = -1 # Variable to store the index of the correct answer. -1 is used to indicate that the correct answer index has not been found yet.
+def format_question(lines, index):
+    try:
+        question = []
+        answers = []
+        correct_answer = None
+        correct_index = -1
 
         # Extract the question text
-        question_text = lines[index].strip() #Get the question text from the line at the given index and remove any leading or trailing whitespace
-        #print(f"Processing line {index}: {question_text}")  # # Debugging statement to print the question text being processed
+        question_text = lines[index].strip()
 
         # Remove the leading number and period after item number (e.g., "1) ", "55) ", "101) ")
-        if question_text[0].isdigit():  # Check if the first character is a digit
-            # Find the position of the period after item number
-            period_pos = question_text.find('.') # Find the position of the period after item number
-            if period_pos != -1: # If a period after item number is found
-                question_text = question_text[period_pos + 2:].strip()  # Remove the leading number and period after item number. 2 is added to the period position to remove the period and the space after it.
+        if question_text[0].isdigit():
+            period_pos = question_text.find('.')
+            if period_pos != -1:
+                question_text = question_text[period_pos + 2:].strip()
 
-        if not question_text: # Check if the question text is empty after removing the leading number and period after item number
-            st.warning(f"Warning: Empty question found at index {index}.") # Display a warning message indicating that an empty question was found
-            return None # Return None to indicate that the question is invalid
+        # Remove any text within square brackets
+        question_text = re.sub(r'\[.*?\]', '', question_text).strip()
 
-        question.append(question_text) # Add the question text to the question list
-        question.append("multiple choice") # Add the question type to the question list
+        if not question_text:
+            st.warning(f"Warning: Empty question found at index {index}.")
+            return None
+
+        question.append(question_text)
+        question.append("multiple choice")
 
         # Extract answers and correct answer from the following lines
-        for i in range(index + 1, len(lines)): # Iterate over the lines following the question
-            line = lines[i].strip() # Get the line text and remove leading/trailing whitespace
-            print(f"Processing line {i}: {line}")  # Debugging statement
+        for i in range(index + 1, len(lines)):
+            line = lines[i].strip()
 
-            if line.startswith(('A)', 'B)', 'C)', 'D)')): # Check if the line starts with an answer letter
-                answers.append(line[3:].strip()) # Add the answer text to the answers list
-            elif line.startswith('ANSWER:'): # Check if the line starts with the correct answer indicator
-                correct_answer = line.split(':')[1].strip() # Extract the correct answer letter
-                break # Exit the loop after finding the correct answer
-            elif line:  # If the line is not empty and doesn't start with an answer or correct answer
-                st.warning(f"Unexpected line found at index {i}: {line}") # Display a warning message
-                return None # Return None to indicate that the question is invalid
-            else: # If the line is empty, skip it
-                continue  # Skip blank lines
+            if line.startswith(('A)', 'B)', 'C)', 'D)')):
+                answers.append(line[3:].strip())
+            elif line.startswith('ANSWER:'):
+                correct_answer = line.split(':')[1].strip()
+                break
+            elif line:
+                st.warning(f"Unexpected line found at index {i}: {line}")
+                return None
+            else:
+                continue
 
         # Validate answers
-        if len(answers) != 4: # Check if there are exactly 4 answers
-            st.warning(f"Warning: Question at index {index} does not have exactly 4 answers.") # Display a warning message
-            return None # Return None to indicate that the question is invalid
+        if len(answers) != 4:
+            st.warning(f"Warning: Question at index {index} does not have exactly 4 answers.")
+            return None
 
         # Determine the correct answer index
-        if correct_answer: # Check if the correct answer was found
-            correct_index = ord(correct_answer) - ord('A') + 1 # Convert the correct answer letter to an index
-            if correct_index < 1 or correct_index > 4:  # Check if the correct answer index is valid
-                st.warning(f"Warning: Invalid correct answer '{correct_answer}' for question at index {index}.") # Display a warning message
-                return None # Return None to indicate that the question is invalid
-        else: # If the correct answer was not found
-            st.warning(f"Warning: No correct answer found for question at index {index}.") # Display a warning message
-            return None # Return None to indicate that the question is invalid
+        if correct_answer:
+            correct_index = ord(correct_answer) - ord('A') + 1
+            if correct_index < 1 or correct_index > 4:
+                st.warning(f"Warning: Invalid correct answer '{correct_answer}' for question at index {index}.")
+                return None
+        else:
+            st.warning(f"Warning: No correct answer found for question at index {index}.")
+            return None
 
-        return question + answers + [correct_index] # Return the formatted question as a list
+        return question + answers + [correct_index]
 
-    except Exception as e: # Catch any other exceptions
-        st.error(f"An error occurred while formatting the question at index {index}: {e}") # Display an error message
-        return None # Return None to indicate that the question is invalid
+    except Exception as e:
+        st.error(f"An error occurred while formatting the question at index {index}: {e}")
+        return None
 
 # Main function for the Streamlit app
 def main(): # Define the main function for the Streamlit app
