@@ -147,7 +147,7 @@ ANSWER: C
         
         # Generate Excel file name based on the uploaded file name
         uploaded_filename = uploaded_file.name
-        excel_filename = f"{os.path.splitext(uploaded_filename)[0]}+QUIZIZZ.xlsx"
+        excel_filename = f"{os.path.splitext(uploaded_filename)[0]}-QUIZIZZ.xlsx"
         
         # Create Excel file in memory
         output = BytesIO()
