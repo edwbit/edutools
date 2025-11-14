@@ -114,7 +114,7 @@ def main():
         "<p style='text-align: center; color: #666;'>Upload a quiz → Get a Quizizz-ready Excel file</p>",
         unsafe_allow_html=True
     )
-    st.divider()
+    # st.divider()
 
     with st.expander("📘 Formatting Guide (click to expand)", expanded=False):
         st.markdown("""
