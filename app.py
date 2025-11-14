@@ -129,7 +129,7 @@ def main():
         ```
         """)
 
-    st.divider()
+    # st.divider()
 
     uploaded_file = st.file_uploader("📤 Upload your `.txt` quiz file", type=["txt"], label_visibility="collapsed")
 
