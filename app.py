@@ -5,7 +5,6 @@ import re
 from openpyxl.styles import Alignment
 from io import BytesIO
 
-# Page config
 st.set_page_config(page_title="EduTools", layout="centered")
 
 # === PARSING LOGIC ===
@@ -15,7 +14,6 @@ ANSWER_DECL_PATTERN = re.compile(r'^\s*ANSWER\s*:\s*([A-Da-d])', re.IGNORECASE)
 
 
 def read_quiz_raw_lines(file_content):
-    """Read file as raw lines (preserving blank lines)"""
     try:
         content = file_content.read().decode('utf-8').splitlines()
         return content
@@ -25,7 +23,6 @@ def read_quiz_raw_lines(file_content):
 
 
 def split_into_blocks(lines):
-    """Split lines into blocks separated by ≥1 blank line"""
     blocks = []
     current_block = []
     for line in lines:
@@ -41,22 +38,16 @@ def split_into_blocks(lines):
 
 
 def parse_question_block(block, block_index):
-    """
-    Parse one question block.
-    Returns: [question, type, A, B, C, D, correct_index (1-4)] or None
-    """
     if not block:
         return None
 
     try:
-        # Question line (strip optional numbering)
         question_line = block[0].strip()
         question_text = QUESTION_NUM_PREFIX.sub('', question_line).strip()
         if not question_text:
             st.warning(f"⚠️ Block {block_index+1}: Empty question line.")
             return None
 
-        # Parse answers A-D
         answers = {}
         i = 1
         while i < len(block):
@@ -72,8 +63,8 @@ def parse_question_block(block, block_index):
                 break
 
         if set(answers.keys()) != {'A', 'B', 'C', 'D'}:
-            missing = set('ABCD') - answers.keys()
-            extra = answers.keys() - set('ABCD')
+            missing = set('ABCD') - set(answers.keys())
+            extra = set(answers.keys()) - set('ABCD')
             msg = f"⚠️ Block {block_index+1}: Answers must be A-D. "
             if missing:
                 msg += f"Missing: {sorted(missing)}. "
@@ -82,7 +73,6 @@ def parse_question_block(block, block_index):
             st.warning(msg)
             return None
 
-        # Find ANSWER: line
         correct_letter = None
         for j in range(i, len(block)):
             decl_match = ANSWER_DECL_PATTERN.match(block[j])
@@ -116,7 +106,6 @@ def parse_question_block(block, block_index):
 
 # === STREAMLIT UI ===
 def main():
-    # Modern title
     st.markdown(
         "<h1 style='text-align: center;'>🔀 Text to Excel for Quizizz</h1>",
         unsafe_allow_html=True
@@ -127,11 +116,10 @@ def main():
     )
     st.divider()
 
-    # Collapsible instructions
     with st.expander("📘 Formatting Guide (click to expand)", expanded=False):
         st.markdown("""
-        ✅ Supports **all** of these styles:
-        - `1. Question?` or just `Question?`
+        ✅ Supports **all** of these:
+        - `1. Question?` or `Question?`
         - `A. Answer` or `A) Answer`
         - Blocks separated by **blank lines**
         - `ANSWER: A`, `ANSWER:A`, case-insensitive
@@ -141,22 +129,15 @@ def main():
         What is DNS?
         A. Domain Name System.
         B. Dynamic Host...
-        C. Windows Update...
-        D. Server Manager...
+        C. ...
+        D. ...
         ANSWER: A
         ```
-
-        💡 Tip: Blank lines between questions help the parser group them correctly.
         """)
-    
+
     st.divider()
 
-    # File uploader
-    uploaded_file = st.file_uploader(
-        "📤 Upload your `.txt` quiz file",
-        type=["txt"],
-        label_visibility="collapsed"
-    )
+    uploaded_file = st.file_uploader("📤 Upload your `.txt` quiz file", type=["txt"], label_visibility="collapsed")
 
     if uploaded_file is not None:
         lines = read_quiz_raw_lines(uploaded_file)
@@ -183,18 +164,16 @@ def main():
         col2.metric("❌ Failed", failed)
         col3.metric("📊 Total", success + failed)
 
-        if not 
+        if not data:
             st.error("❌ No valid questions parsed. Check formatting or see guide above.")
             return
 
-        # Create DataFrame
         df = pd.DataFrame(data, columns=[
             'Question Text', 'Question Type',
             'Option 1', 'Option 2', 'Option 3', 'Option 4',
             'Correct Answer'
         ])
 
-        # Excel export
         base_name = os.path.splitext(uploaded_file.name)[0]
         excel_name = f"{base_name}-QUIZIZZ.xlsx"
 
@@ -202,12 +181,11 @@ def main():
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Sheet1')
             ws = writer.sheets['Sheet1']
-            # Column widths
-            ws.column_dimensions['A'].width = 70  # Question
-            ws.column_dimensions['B'].width = 15  # Type
-            for col in 'CDEF': ws.column_dimensions[col].width = 55
-            ws.column_dimensions['G'].width = 15  # Correct Answer
-            # Wrap text
+            ws.column_dimensions['A'].width = 70
+            ws.column_dimensions['B'].width = 15
+            for col in 'CDEF':
+                ws.column_dimensions[col].width = 55
+            ws.column_dimensions['G'].width = 15
             for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=7):
                 for cell in row:
                     cell.alignment = Alignment(wrap_text=True, vertical='top')
@@ -222,10 +200,9 @@ def main():
             use_container_width=True
         )
 
-        # Preview
         with st.expander("🔍 Preview (first 5 questions)"):
             preview = df.head(5).copy()
-            preview['Correct Answer'] = preview['Correct Answer'].map({1:'A', 2:'B', 3:'C', 4:'D'})
+            preview['Correct Answer'] = preview['Correct Answer'].map({1: 'A', 2: 'B', 3: 'C', 4: 'D'})
             st.dataframe(
                 preview[['Question Text', 'Option 1', 'Option 2', 'Correct Answer']],
                 use_container_width=True,
@@ -233,6 +210,5 @@ def main():
             )
 
 
-# Run app
 if __name__ == "__main__":
     main()
