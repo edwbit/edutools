@@ -5,10 +5,11 @@ import re
 from openpyxl.styles import Alignment
 from io import BytesIO
 
-st.set_page_config(page_title="EduTools")
+# Page config
+st.set_page_config(page_title="EduTools", layout="centered")
 
-# Regex patterns
-QUESTION_NUM_PREFIX = re.compile(r'^\s*\d+\s*[.)]\s*')  # e.g., "1. ", "10) ", "5)   "
+# === PARSING LOGIC ===
+QUESTION_NUM_PREFIX = re.compile(r'^\s*\d+\s*[.)]\s*')
 ANSWER_LINE_PATTERN = re.compile(r'^\s*([A-Da-d])[\.\)]\s*(.*)', re.IGNORECASE)
 ANSWER_DECL_PATTERN = re.compile(r'^\s*ANSWER\s*:\s*([A-Da-d])', re.IGNORECASE)
 
@@ -19,7 +20,7 @@ def read_quiz_raw_lines(file_content):
         content = file_content.read().decode('utf-8').splitlines()
         return content
     except Exception as e:
-        st.error(f"Error reading file: {e}")
+        st.error(f"❌ Error reading file: {e}")
         return None
 
 
@@ -29,10 +30,9 @@ def split_into_blocks(lines):
     current_block = []
     for line in lines:
         if line.strip() == "":
-            if current_block:  # end of block
+            if current_block:
                 blocks.append(current_block)
                 current_block = []
-            # else: skip consecutive blanks
         else:
             current_block.append(line)
     if current_block:
@@ -42,47 +42,39 @@ def split_into_blocks(lines):
 
 def parse_question_block(block, block_index):
     """
-    Parse one question block (list of non-blank lines).
-    Returns:
-        [question_text, 'multiple choice', A, B, C, D, correct_index (1-4)]
-        or None if invalid.
+    Parse one question block.
+    Returns: [question, type, A, B, C, D, correct_index (1-4)] or None
     """
     if not block:
         return None
 
     try:
-        # Step 1: First non-empty line is question (may have number prefix)
+        # Question line (strip optional numbering)
         question_line = block[0].strip()
-        # Remove optional numbering like "1. " or "10) "
         question_text = QUESTION_NUM_PREFIX.sub('', question_line).strip()
         if not question_text:
-            st.warning(f"Block {block_index+1}: Empty or unparseable question line: '{question_line}'")
+            st.warning(f"⚠️ Block {block_index+1}: Empty question line.")
             return None
 
-        # Step 2: Parse answer lines (A-D)
+        # Parse answers A-D
         answers = {}
         i = 1
         while i < len(block):
             line = block[i].strip()
-            # Check for answer line: A. ... or A) ...
-            ans_match = ANSWER_LINE_PATTERN.match(line)
-            if ans_match:
-                letter = ans_match.group(1).upper()
-                text = ans_match.group(2).strip()
+            match = ANSWER_LINE_PATTERN.match(line)
+            if match:
+                letter = match.group(1).upper()
+                text = match.group(2).strip()
                 if letter in 'ABCD':
                     answers[letter] = text
-                else:
-                    st.warning(f"Block {block_index+1}: Unexpected answer letter '{letter}' in: '{line}'")
-                    return None
                 i += 1
             else:
-                break  # Done with answers
+                break
 
-        # Must have exactly A, B, C, D
         if set(answers.keys()) != {'A', 'B', 'C', 'D'}:
-            missing = set('ABCD') - set(answers.keys())
-            extra = set(answers.keys()) - set('ABCD')
-            msg = f"Block {block_index+1}: Expected A-D answers. "
+            missing = set('ABCD') - answers.keys()
+            extra = answers.keys() - set('ABCD')
+            msg = f"⚠️ Block {block_index+1}: Answers must be A-D. "
             if missing:
                 msg += f"Missing: {sorted(missing)}. "
             if extra:
@@ -90,7 +82,7 @@ def parse_question_block(block, block_index):
             st.warning(msg)
             return None
 
-        # Step 3: Find ANSWER: line in remaining lines
+        # Find ANSWER: line
         correct_letter = None
         for j in range(i, len(block)):
             decl_match = ANSWER_DECL_PATTERN.match(block[j])
@@ -99,13 +91,13 @@ def parse_question_block(block, block_index):
                 break
 
         if not correct_letter:
-            st.warning(f"Block {block_index+1}: No 'ANSWER: X' line found.")
+            st.warning(f"⚠️ Block {block_index+1}: Missing 'ANSWER: X' line.")
             return None
         if correct_letter not in 'ABCD':
-            st.warning(f"Block {block_index+1}: Invalid answer '{correct_letter}'. Expected A-D.")
+            st.warning(f"⚠️ Block {block_index+1}: Invalid answer '{correct_letter}'.")
             return None
 
-        correct_index = ord(correct_letter) - ord('A') + 1  # A→1, B→2, etc.
+        correct_index = ord(correct_letter) - ord('A') + 1
 
         return [
             question_text,
@@ -118,102 +110,129 @@ def parse_question_block(block, block_index):
         ]
 
     except Exception as e:
-        st.error(f"Block {block_index+1}: Error parsing: {e}")
+        st.error(f"💥 Block {block_index+1}: Parsing error — {e}")
         return None
 
 
+# === STREAMLIT UI ===
 def main():
-    st.title("Text to Excel for Quizizz 🔄")
-    st.write("Upload a quiz text file and convert it into an Excel file for Quizizz.com.")
-    st.write("**Formatting is flexible! Supports:**")
-    st.markdown("""
-    - Numbered (`1.`) or unnumbered questions  
-    - `A.` or `A)` style answers  
-    - Blocks separated by blank lines  
-    - `ANSWER: A`, `ANSWER:A`, etc.
-    """)
-    st.code("""\
-1. What is DNS?
-A. Domain Name System.
-B. Dynamic Host...
-C. ...
-D. ...
-ANSWER: A
+    # Modern title
+    st.markdown(
+        "<h1 style='text-align: center;'>🔀 Text to Excel for Quizizz</h1>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='text-align: center; color: #666;'>Upload a quiz → Get a Quizizz-ready Excel file</p>",
+        unsafe_allow_html=True
+    )
+    st.divider()
 
-Why use static IP?
-A) So clients can find it.
-B) ...
-C) ...
-D) ...
-ANSWER: A\
-""", language="text")
+    # Collapsible instructions
+    with st.expander("📘 Formatting Guide (click to expand)", expanded=False):
+        st.markdown("""
+        ✅ Supports **all** of these styles:
+        - `1. Question?` or just `Question?`
+        - `A. Answer` or `A) Answer`
+        - Blocks separated by **blank lines**
+        - `ANSWER: A`, `ANSWER:A`, case-insensitive
 
-    uploaded_file = st.file_uploader("Upload your quiz text file", type=["txt"])
+        📝 Example:
+        ```
+        What is DNS?
+        A. Domain Name System.
+        B. Dynamic Host...
+        C. Windows Update...
+        D. Server Manager...
+        ANSWER: A
+        ```
+
+        💡 Tip: Blank lines between questions help the parser group them correctly.
+        """)
+    
+    st.divider()
+
+    # File uploader
+    uploaded_file = st.file_uploader(
+        "📤 Upload your `.txt` quiz file",
+        type=["txt"],
+        label_visibility="collapsed"
+    )
+
     if uploaded_file is not None:
         lines = read_quiz_raw_lines(uploaded_file)
         if lines is None:
             return
 
         blocks = split_into_blocks(lines)
-        st.info(f"Detected {len(blocks)} question blocks (separated by blank lines).")
+        st.info(f"📄 Found **{len(blocks)}** question blocks.")
 
         data = []
-        success_count = 0
-        fail_count = 0
+        success, failed = 0, 0
 
         for idx, block in enumerate(blocks):
-            result = parse_question_block(block, idx)
-            if result:
-                data.append(result)
-                success_count += 1
+            parsed = parse_question_block(block, idx)
+            if parsed:
+                data.append(parsed)
+                success += 1
             else:
-                fail_count += 1
+                failed += 1
 
-        st.info(f"✅ Success: {success_count} | ❌ Failed: {fail_count}")
+        st.divider()
+        col1, col2, col3 = st.columns(3)
+        col1.metric("✅ Success", success)
+        col2.metric("❌ Failed", failed)
+        col3.metric("📊 Total", success + failed)
 
-        if not data:
-            st.error("No valid questions parsed. Please check formatting.")
+        if not 
+            st.error("❌ No valid questions parsed. Check formatting or see guide above.")
             return
 
+        # Create DataFrame
         df = pd.DataFrame(data, columns=[
             'Question Text', 'Question Type',
             'Option 1', 'Option 2', 'Option 3', 'Option 4',
             'Correct Answer'
         ])
 
-        # Optional: sort by original block order (already preserved)
-        # df = df.sort_index()
-
-        # Generate Excel
-        uploaded_filename = uploaded_file.name
-        excel_filename = f"{os.path.splitext(uploaded_filename)[0]}-QUIZIZZ.xlsx"
+        # Excel export
+        base_name = os.path.splitext(uploaded_file.name)[0]
+        excel_name = f"{base_name}-QUIZIZZ.xlsx"
 
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Sheet1')
             ws = writer.sheets['Sheet1']
-            # Set widths
-            ws.column_dimensions['A'].width = 70
-            ws.column_dimensions['B'].width = 15
-            for col in 'CDEFG':
-                ws.column_dimensions[col].width = 60 if col in 'CDEF' else 15
+            # Column widths
+            ws.column_dimensions['A'].width = 70  # Question
+            ws.column_dimensions['B'].width = 15  # Type
+            for col in 'CDEF': ws.column_dimensions[col].width = 55
+            ws.column_dimensions['G'].width = 15  # Correct Answer
             # Wrap text
             for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=7):
                 for cell in row:
                     cell.alignment = Alignment(wrap_text=True, vertical='top')
 
-        st.success(f"✅ Successfully parsed {success_count} questions!")
+        st.success(f"🎉 Successfully converted **{success}** questions!")
         st.download_button(
             label="📥 Download Excel for Quizizz",
             data=output.getvalue(),
-            file_name=excel_filename,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            file_name=excel_name,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="primary",
+            use_container_width=True
         )
 
-        # Optional: show preview
-        with st.expander("🔍 Preview Parsed Questions"):
-            st.dataframe(df[['Question Text', 'Option 1', 'Option 2', 'Correct Answer']].head(10))
+        # Preview
+        with st.expander("🔍 Preview (first 5 questions)"):
+            preview = df.head(5).copy()
+            preview['Correct Answer'] = preview['Correct Answer'].map({1:'A', 2:'B', 3:'C', 4:'D'})
+            st.dataframe(
+                preview[['Question Text', 'Option 1', 'Option 2', 'Correct Answer']],
+                use_container_width=True,
+                hide_index=True
+            )
 
 
+# Run app
 if __name__ == "__main__":
     main()
