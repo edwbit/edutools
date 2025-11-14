@@ -118,19 +118,13 @@ def main():
 
     with st.expander("📘 Formatting Guide (click to expand)", expanded=False):
         st.markdown("""
-        ✅ Supports **all** of these:
-        - `1. Question?` or `Question?`
-        - `A. Answer` or `A) Answer`
-        - Blocks separated by **blank lines**
-        - `ANSWER: A`, `ANSWER:A`, case-insensitive
-
-        📝 Example:
+        📝 Sample Question Format:
         ```
         What is DNS?
-        A. Domain Name System.
-        B. Dynamic Host...
-        C. ...
-        D. ...
+        A. Domain Name System
+        B. Dynamic Host Configuration Protocol
+        C. Data Naming Services
+        D. Digital Network Security
         ANSWER: A
         ```
         """)
