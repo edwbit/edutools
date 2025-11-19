@@ -111,8 +111,9 @@ def main():
         unsafe_allow_html=True
     )
     st.markdown(
-        "<p style='text-align: center; color: #666;'>Upload a quiz → Get a Quizizz-ready Excel file</p>",
+        "<p style='text-align: center; color: #666;'>Upload a quiz → Get a Quizizz-ready Excel file</p>"
         "<p style='text-align: center; color: #666;'>Vibe code: Edwin B. Bitco</p>",
+        
         unsafe_allow_html=True
     )
     # st.divider()
