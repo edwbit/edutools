@@ -112,7 +112,7 @@ def main():
     )
     st.markdown(
         "<p style='text-align: center; color: #666;'>Upload a quiz → Get a Quizizz-ready Excel file</p>"
-        "<p style='text-align: center; color: #666;'>Vibe code: Edwin B. Bitco</p>",
+        "<p style='text-align: center; color: #666;'>Vibe Coder: Edwin B. Bitco</p>",
         
         unsafe_allow_html=True
     )
