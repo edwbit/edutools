@@ -101,5 +101,9 @@ def main():
                 hide_index=True
             )
 
+# Support both direct execution and Streamlit Cloud
 if __name__ == "__main__":
+    main()
+else:
+    # For Streamlit Cloud compatibility
     main()
