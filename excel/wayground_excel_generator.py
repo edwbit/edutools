@@ -20,6 +20,9 @@ def generate_quizizz_excel(data, base_filename):
         'Correct Answer'
     ])
 
+    # Sort questions alphabetically by question text
+    df = df.sort_values('Question Text', ascending=True).reset_index(drop=True)
+
     excel_name = f"{base_filename}-QUIZIZZ.xlsx"
     output = BytesIO()
 

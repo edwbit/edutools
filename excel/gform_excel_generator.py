@@ -41,6 +41,9 @@ def generate_gform_excel(data, base_filename):
     # Create DataFrame with Google Forms structure
     df = pd.DataFrame(processed_data)
 
+    # Sort questions alphabetically by question text
+    df = df.sort_values('Question', ascending=True).reset_index(drop=True)
+
     # Set default points (Google Forms typically uses 1 point per question)
     # Note: Points are already set in the data processing above
 
