@@ -1,0 +1,103 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+.env
+.env/
+.envrc
+.env.local
+.env.*.local
+.venv
+.venv/
+
+# Streamlit
+.streamlit/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Data files
+*.xlsx
+*.docx
+*.txt
+quiz.txt
+quiz.docx
+
+# Test and debug files
+test_*.py
+debug_*.py
+
+# Output files
+*.xlsx
+output/
+results/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+*.log
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build artifacts
+dist/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Coverage
+.coverage
+*.cover
+*.py,cover
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# OS generated files
+ehthumbs.db
+Thumbs.db
