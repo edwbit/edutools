@@ -117,6 +117,14 @@ def main():
         C. Data Naming Services
         D. Digital Network Security
         ANSWER: A
+        
+        What does SMART mainly monitor in drives?
+        A) Temperature, sector counts, and firmware‑recorded errors
+        B) Motherboard chipset details with voltage specifications
+        C) Graphics load percentages during gaming situations
+        D) RAM timing values measured under synthetic tests
+        ANSWER: A
+
         ```
 
         ✅ **Supported File Formats**: `.txt` and `.docx`
