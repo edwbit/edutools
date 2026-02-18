@@ -14,11 +14,10 @@ def generate_quizizz_excel(data, base_filename):
         tuple: (excel_name, output_bytes) where excel_name is the filename string
               and output_bytes is BytesIO object containing the Excel data
     """
-    # Add Time in seconds column (default 60 seconds)
-    for row in data:
-        row.append(60)  # Add time value
+    # Add Time in seconds column (default 60 seconds) - create new list to avoid mutating original data
+    data_with_time = [row + [60] for row in data]
 
-    df = pd.DataFrame(data, columns=[
+    df = pd.DataFrame(data_with_time, columns=[
         'Question Text', 'Question Type',
         'Option 1', 'Option 2', 'Option 3', 'Option 4',
         'Correct Answer', 'Time in seconds'
