@@ -14,10 +14,14 @@ def generate_quizizz_excel(data, base_filename):
         tuple: (excel_name, output_bytes) where excel_name is the filename string
               and output_bytes is BytesIO object containing the Excel data
     """
+    # Add Time in seconds column (default 60 seconds)
+    for row in data:
+        row.append(60)  # Add time value
+
     df = pd.DataFrame(data, columns=[
         'Question Text', 'Question Type',
         'Option 1', 'Option 2', 'Option 3', 'Option 4',
-        'Correct Answer'
+        'Correct Answer', 'Time in seconds'
     ])
 
     # Sort questions alphabetically by question text
@@ -38,9 +42,10 @@ def generate_quizizz_excel(data, base_filename):
         ws.column_dimensions['E'].width = 55  # Option 3
         ws.column_dimensions['F'].width = 55  # Option 4
         ws.column_dimensions['G'].width = 15  # Correct Answer
+        ws.column_dimensions['H'].width = 15  # Time in seconds
 
         # Apply text wrapping and alignment
-        for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=7):
+        for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=8):
             for cell in row:
                 cell.alignment = Alignment(wrap_text=True, vertical='top')
 
